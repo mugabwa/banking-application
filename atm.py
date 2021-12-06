@@ -11,7 +11,6 @@ class Globals:
     message = ''
     damount = None
 
-message = ''
 
 class ATM:
     def __init__(self, Bank) -> None:
@@ -67,13 +66,13 @@ class tkinterApp(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
         Globals.amount = tk.StringVar()
         Globals.damount = tk.StringVar()
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both",expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
+        self.container = tk.Frame(self)
+        self.container.pack(side="top", fill="both",expand=True)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
         self.frames = {}
-        for F in (MainPage, VerificationPage, OptionPage, DepositPage, WithdrawPage,TransactionPage):
-            frame = F(container, self)
+        for F in (MainPage, VerificationPage, OptionPage, DepositPage, WithdrawPage):
+            frame = F(self.container, self)
             self.frames[F] = frame
             frame.grid(row=0,column=0,sticky='nsew')
         self.show_frame(MainPage)
@@ -90,37 +89,42 @@ class tkinterApp(tk.Tk):
         self.obj.closeTransaction()
         self.show_frame(MainPage)
 
-    def getmsg(self):
-        global message
-        return message
-        return Globals.message
+    # def getmsg(self):
+    #     return Globals.message
+
+    def transact(self):
+        if 'Error' not in Globals.message:
+            messagebox.showinfo("information",Globals.message)
+        else:
+            messagebox.showerror("error",Globals.message)
 
     def transactions(self,opt):
-        global message
         if opt == 'deposit':
-            # print(Globals.damount.get())
             self.obj.deposit(Globals.damount.get())
-            message = "You have successfuly deposited {}".format(Globals.damount.get())
-            self.show_frame(TransactionPage)
-            print(self.getmsg())
-        # elif opt == 'withdraw':
-        #     if(self.obj.withdraw(Globals.amount.get())):
-        #         Globals.message = "You have successfuly withdrawn {}".format(Globals.amount.get())
-        #     else:
-        #         Globals.message = "Error! Withdrawal of {} failed".format(Globals.amount.get())
-        #     self.show_frame(TransactionPage)
-        # elif opt == 'balance':
-        #     Globals.message = "You account balance is {}".format(self.obj.checkBalance())
-        #     self.show_frame(TransactionPage)
-        # elif opt == 'history':
-        #     if(self.obj.transactionHistory()):
-        #         for x in self.obj.transactionHistory():
-        #             Globals.message += x[1]
-        #             Globals.message += '\n'
-        #         print('xx ',Globals.message)
-        #     else:
-        #         Globals.message = "Error! Transaction history is empty!"
-        #     self.show_frame(TransactionPage)
+            Globals.message = "You have successfuly deposited {}".format(Globals.damount.get())
+            self.transact()
+            self.show_frame(OptionPage)
+        elif opt == 'withdraw':
+            if(self.obj.withdraw(Globals.amount.get())):
+                Globals.message = "You have successfuly withdrawn {}".format(Globals.amount.get())
+            else:
+                Globals.message = "Error! Withdrawal of {} failed".format(Globals.amount.get())
+            self.transact()
+            self.show_frame(OptionPage)
+        elif opt == 'balance':
+            Globals.message = "You account balance is {}".format(self.obj.checkBalance())
+            self.transact()
+            self.show_frame(OptionPage)
+        elif opt == 'history':
+            if(self.obj.transactionHistory()):
+                for x in self.obj.transactionHistory():
+                    Globals.message += x[1]
+                    Globals.message += '\n'
+                print('xx ',Globals.message)
+            else:
+                Globals.message = "Error! Transaction history is empty!"
+            self.transact()
+            self.show_frame(OptionPage)
 
 
 
@@ -210,20 +214,20 @@ class WithdrawPage(tk.Frame):
         btn1 = tk.Button(self,text="Return To Main Page",command=lambda:controller.close())
         btn1.grid(row=2,column=0,padx=5,pady=5)
 
-class TransactionPage(tk.Frame):
-    def __init__(self, parent, controller):
-        global message
-        tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Transaction Page")
-        label.grid(row=0, columnspan=3, padx=5, pady=5)
-        txt = tk.Text(self, height=5)
-        txt.grid(row=1,columnspan=3,padx=5, pady=5)
-        btn1 = tk.Button(self,text="OK",command=lambda:controller.show_frame(OptionPage))
-        btn1.grid(row=2,column=2,padx=5,pady=5)
-        btn1 = tk.Button(self,text="Return To Main Page",command=lambda:controller.close())
-        btn1.grid(row=2,column=0,padx=5,pady=5)
-        txt.insert(tk.END, controller.getmsg())
-        print('1', message)
+# class TransactionPage(tk.Frame):
+#     def __init__(self, parent, controller):
+#         global message
+#         tk.Frame.__init__(self,parent)
+#         label = tk.Label(self, text="Transaction Page")
+#         label.grid(row=0, columnspan=3, padx=5, pady=5)
+#         txt = tk.Text(self, height=5)
+#         txt.grid(row=1,columnspan=3,padx=5, pady=5)
+#         btn1 = tk.Button(self,text="OK",command=lambda:controller.show_frame(OptionPage))
+#         btn1.grid(row=2,column=2,padx=5,pady=5)
+#         btn1 = tk.Button(self,text="Return To Main Page",command=lambda:controller.close())
+#         btn1.grid(row=2,column=0,padx=5,pady=5)
+#         txt.insert(tk.END, lambda:controller.getmsg())
+#         print('1', message, ' 2', lambda:controller.getmsg())
 
 def main():
     users = {"12345":"password","67890":"password1","92304":"password2"}
